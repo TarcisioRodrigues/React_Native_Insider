@@ -1,10 +1,10 @@
 import React, { useState, useEffect } from 'react';
-import { ScrollView } from 'react-native';
+import { ScrollView, ActivityIndicator } from 'react-native';
 import Header from '../components/Header';
 import SliderItem from '../components/SliderItem';
 import { Feather } from '@expo/vector-icons';
 import api, { key } from '../../services/api';
-import { getListMovies } from '../../utils/movie';
+import { getListMovies, randomBanner } from '../../utils/movie';
 import {
   Container,
   SearchContainer,
@@ -15,13 +15,18 @@ import {
   Banner,
   SliderMovie,
 } from './styles';
+import { useNavigation } from '@react-navigation/native';
 function Home() {
   const [nowMovies, setNowMovies] = useState([]);
   const [popularMovies, setPopularMovies] = useState([]);
   const [topMovies, setTopMovies] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [bannerMovie, setBannerMovie] = useState({});
+  const navigation = useNavigation();
 
   useEffect(() => {
     let isActive = true;
+    const ac = new AbortController(); //Para cancelar tudo
     async function getMovies() {
       // const response = await api.get('/movie/now_playing', {
       //     params: {
@@ -52,23 +57,44 @@ function Home() {
           },
         }),
       ]);
-      const nowList = getListMovies(10, nowData.data.results);
-      const popularList = getListMovies(5, popularData.data.results);
-      const topList = getListMovies(5, topData.data.results);
-      setNowMovies(nowList);
-      setPopularMovies(popularList);
-      setTopMovies(topList);
+      if (isActive) {
+        const nowList = getListMovies(10, nowData.data.results);
+        const popularList = getListMovies(5, popularData.data.results);
+        const topList = getListMovies(5, topData.data.results);
+        setBannerMovie(
+          nowData.data.results[randomBanner(nowData.data.results)]
+        );
+        setNowMovies(nowList);
+        setPopularMovies(popularList);
+        setTopMovies(topList);
+        setLoading(false);
+      }
     }
 
     getMovies();
-  }, []);
 
+    return () => {
+      isActive = false;
+      ac.abort();
+    };
+  }, []);
+  function navigateDetailsPage(item) {
+    navigation.navigate('Detail', { id: item.id });
+  }
+  //Renderizaão condicional
+  if (loading) {
+    return (
+      <Container>
+        <ActivityIndicator size="large" color="#FFF" />
+      </Container>
+    );
+  }
   return (
     <Container>
       <Header title="React Prime" />
 
       <SearchContainer>
-        <Input placeholder="Ex:Vingadores" />
+        <Input placeholder="Digite seu filme" placeholderTextColor="#DDD" />
         <SearchButton>
           <Feather name="search" size={30} color="#FFF" />
         </SearchButton>
@@ -76,11 +102,14 @@ function Home() {
 
       <ScrollView showsVerticalScrollIndicator={false}>
         <Title>Em cartaz</Title>
-        <BannerButton activeOpacity={0.8} onPress={() => alert('Teste')}>
+        <BannerButton
+          activeOpacity={0.8}
+          onPress={() => navigateDetailsPage(bannerMovie)}
+        >
           <Banner
             resizeMethod="resize"
             source={{
-              uri: 'https://images.unsplash.com/photo-1632914026261-0b9fa8665c36?ixid=MnwxMjA3fDB8MHxlZGl0b3JpYWwtZmVlZHwyMnx8fGVufDB8fHx8&ixlib=rb-1.2.1&auto=format&fit=crop&w=500&q=60',
+              uri: `https://image.tmdb.org/t/p/original/${bannerMovie.poster_path}`,
             }}
           />
         </BannerButton>
@@ -88,7 +117,12 @@ function Home() {
           horizontal={true}
           data={nowMovies}
           showHorizontalIndicator={false}
-          renderItem={({ item }) => <SliderItem data={item} />}
+          renderItem={({ item }) => (
+            <SliderItem
+              data={item}
+              navigatePage={() => navigateDetailsPage(item)}
+            />
+          )}
           keyExtractor={(item) => String(item.id)}
         />
         <Title>Populares</Title>
@@ -96,7 +130,12 @@ function Home() {
           horizontal={true}
           data={popularMovies}
           showHorizontalIndicator={false}
-          renderItem={({ item }) => <SliderItem data={item} />}
+          renderItem={({ item }) => (
+            <SliderItem
+              data={item}
+              navigatePage={() => navigateDetailsPage(item)}
+            />
+          )}
           keyExtractor={(item) => String(item.id)}
         />
         <Title>Mais votados</Title>
@@ -104,7 +143,12 @@ function Home() {
           horizontal={true}
           data={topMovies}
           showHorizontalIndicator={false}
-          renderItem={({ item }) => <SliderItem data={item} />}
+          renderItem={({ item }) => (
+            <SliderItem
+              data={item}
+              navigatePage={() => navigateDetailsPage(item)}
+            />
+          )}
           keyExtractor={(item) => String(item.id)}
         />
       </ScrollView>
