@@ -10,7 +10,7 @@ export const Container = styled.TouchableOpacity`
 
 export const BannerItem = styled.Image`
   width: 100%;
-  height: 170px;
+  height: 160px;
   border-radius: 8px;
 `;
 

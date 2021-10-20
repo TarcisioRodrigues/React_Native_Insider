@@ -49,6 +49,6 @@ export const Banner = styled.Image`
 `;
 
 export const SliderMovie = styled.FlatList`
-  height: 150px;
+  height: 250px;
   padding: 0 14px;
 `;

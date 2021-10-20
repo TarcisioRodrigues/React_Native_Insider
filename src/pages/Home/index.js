@@ -22,7 +22,7 @@ function Home() {
   const [topMovies, setTopMovies] = useState([]);
   const [loading, setLoading] = useState(true);
   const [bannerMovie, setBannerMovie] = useState({});
-  const [input, setInput] = useState(' ');
+  const [input, setInput] = useState('');
   const navigation = useNavigation();
 
   useEffect(() => {
@@ -47,7 +47,7 @@ function Home() {
           params: {
             api_key: key,
             language: 'pt-BR',
-            page: 1,
+            page: 2,
           },
         }),
         api.get('/movie/top_rated', {
@@ -60,7 +60,7 @@ function Home() {
       ]);
       if (isActive) {
         const nowList = getListMovies(10, nowData.data.results);
-        const popularList = getListMovies(5, popularData.data.results);
+        const popularList = getListMovies(3, popularData.data.results);
         const topList = getListMovies(5, topData.data.results);
         setBannerMovie(
           nowData.data.results[randomBanner(nowData.data.results)]
