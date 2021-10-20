@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { ScrollView, ActivityIndicator } from 'react-native';
-import Header from '../components/Header';
-import SliderItem from '../components/SliderItem';
+import Header from '../../components/Header';
+import SliderItem from '../../components/SliderItem';
 import { Feather } from '@expo/vector-icons';
 import api, { key } from '../../services/api';
 import { getListMovies, randomBanner } from '../../utils/movie';
@@ -22,6 +22,7 @@ function Home() {
   const [topMovies, setTopMovies] = useState([]);
   const [loading, setLoading] = useState(true);
   const [bannerMovie, setBannerMovie] = useState({});
+  const [input, setInput] = useState(' ');
   const navigation = useNavigation();
 
   useEffect(() => {
@@ -81,6 +82,16 @@ function Home() {
   function navigateDetailsPage(item) {
     navigation.navigate('Detail', { id: item.id });
   }
+
+  function handleSearchMovie() {
+    //Verificando
+    if (input === '') {
+      return;
+    }
+
+    navigation.navigate('Search', { name: input });
+    setInput(' ');
+  }
   //Renderizaão condicional
   if (loading) {
     return (
@@ -94,8 +105,13 @@ function Home() {
       <Header title="React Prime" />
 
       <SearchContainer>
-        <Input placeholder="Digite seu filme" placeholderTextColor="#DDD" />
-        <SearchButton>
+        <Input
+          placeholder="Digite seu filme"
+          placeholderTextColor="#DDD"
+          value={input}
+          OnChangeText={(text) => setInput(text)}
+        />
+        <SearchButton onPress={handleSearchMovie}>
           <Feather name="search" size={30} color="#FFF" />
         </SearchButton>
       </SearchContainer>

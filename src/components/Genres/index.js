@@ -1,6 +1,6 @@
 import React from 'react';
 import { Container, Name } from './styles';
-import api from '../../../services/api';
+import api from '../../services/api';
 function Genres({ data }) {
   return (
     <Container>
